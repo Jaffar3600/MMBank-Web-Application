@@ -6,7 +6,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -24,6 +32,9 @@ import com.moneymoney.exception.AccountNotFoundException;
 public class mmBankSavingAccount extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final SavingsAccount SavingsAccount = null;
+	private RequestDispatcher dispatcher;
+	private int count=1;
+	
 	@Override
 	public void init() throws ServletException {
 		super.init();
@@ -50,7 +61,7 @@ public class mmBankSavingAccount extends HttpServlet {
 		switch(path){
 			 
 		case "/addNewAccount.mm":
-			response.sendRedirect("addNewAccount.html");
+			response.sendRedirect("addNewAccount.jsp");
 			break;
 		case "/savingsAccount.mm":
 			String name = request.getParameter("accountHolderName");
@@ -66,7 +77,7 @@ public class mmBankSavingAccount extends HttpServlet {
 		
 			
 		case "/closeAccount.mm":
-			response.sendRedirect("closeAccount.html");
+			response.sendRedirect("closeAccount.jsp");
 		
 			break;
 		case "/delete.mm":
@@ -81,7 +92,7 @@ public class mmBankSavingAccount extends HttpServlet {
 			break;
 			
 		case "/getCurrentBalance.mm":
-			response.sendRedirect("getCurrentBalance.html");
+			response.sendRedirect("getCurrentBalance.jsp");
 			break;
 	
 		case "/getCurrentBal.mm":
@@ -98,7 +109,7 @@ public class mmBankSavingAccount extends HttpServlet {
 			break;
 			
 		case "/withdraw.mm":
-			response.sendRedirect("Withdraw.html");
+			response.sendRedirect("Withdraw.jsp");
 			break;
 		case "/Withdraw.mm":
 			int accountNumber2 = Integer.parseInt(request.getParameter("accountNumber"));
@@ -117,11 +128,150 @@ public class mmBankSavingAccount extends HttpServlet {
 				e.printStackTrace();
 			}
 			break;
+			
+		case "/deposit.mm":
+			response.sendRedirect("deposit.jsp");
+			break;
+			
+		case "/Deposit.mm":
+			int accountNumber3 = Integer.parseInt(request.getParameter("accountNumber"));
+			double amount1 = Double.parseDouble(request.getParameter("amount"));
+			try {
+				savingsAccount=savingaccountservice.getAccountById(accountNumber3);
+				savingaccountservice.deposit(savingsAccount, amount1);
+				 DBUtil.commit();
+			} 
+			catch (AccountNotFoundException e) {
+				
+				e.printStackTrace();
+			}
+		 catch (ClassNotFoundException | SQLException e) {
+			
+			e.printStackTrace();
+		}			
+			break;
+		case "/fundTransfer.mm":
+			response.sendRedirect("fundTransfer.jsp");
+			break;
+			
+		case "/FundTransfer.mm":
+			int accountNumber4=Integer.parseInt(request.getParameter("accountNumber1"));
+			int accountNumber5=Integer.parseInt(request.getParameter("accountNumber2"));
+			double amount3 = Double.parseDouble(request.getParameter("amount"));
+			try {
+				SavingsAccount ss =savingaccountservice.getAccountById(accountNumber4);
+				SavingsAccount sr=savingaccountservice.getAccountById(accountNumber5);
+				savingaccountservice.fundTransfer(ss,sr,amount3);
+				 DBUtil.commit();
+			} catch (ClassNotFoundException | SQLException
+					| AccountNotFoundException e) {
+				
+				e.printStackTrace();
+			}
+			break;
+			
+		case "/searchForm.mm":
+			response.sendRedirect("SearchForm.jsp");
+			break;
+		case "/search.mm":
+			int accountNumber11 = Integer.parseInt(request.getParameter("AccountNumber"));
+			try {
+				SavingsAccount account = savingaccountservice.getAccountById(accountNumber11);
+				request.setAttribute("account", account);
+				dispatcher = request.getRequestDispatcher("AccountDetails.jsp");
+				dispatcher.forward(request, response);
+			} catch (ClassNotFoundException | SQLException | AccountNotFoundException e) {
+				e.printStackTrace();
+			}
+			break;
+		case "/getAll.mm":
+			try {
+				java.util.List<com.moneymoney.account.SavingsAccount> accounts = savingaccountservice.getAllSavingsAccount();
+				request.setAttribute("accounts", accounts);
+				dispatcher = request.getRequestDispatcher("AccountDetails.jsp");
+				dispatcher.forward(request, response);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			}
+			break;
+			
+		case "/sortByName.mm":
+			count+=1;
+			try {
+				Collection<SavingsAccount> accounts = savingaccountservice.getAllSavingsAccount();
+				List<SavingsAccount> accountSet = new ArrayList<>(accounts);
+					Collections.sort(accountSet,new Comparator<SavingsAccount>(){
+					@Override
+					public int compare(SavingsAccount arg0, SavingsAccount arg1) {
+						int result= arg0.getBankAccount().getAccountHolderName().compareTo
+								(arg1.getBankAccount().getAccountHolderName());
+						if(count%2==0)
+							return 1;
+						return -1;
+	
+					}
+				});
+				
+				request.setAttribute("accounts", accountSet);
+				dispatcher = request.getRequestDispatcher("AccountDetails.jsp");
+				dispatcher.forward(request, response);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			}
+			break;
+			
+		case "/sortByBalance.mm":
+			count+=1;
+			try {
+				Collection<SavingsAccount> accounts = savingaccountservice.getAllSavingsAccount();
+				List<SavingsAccount> accountSet = new ArrayList<>(accounts);
+				Collections.sort(accountSet,new Comparator<SavingsAccount>(){
+					@Override
+					public int compare(SavingsAccount arg0, SavingsAccount arg1) {
+						int result= (int) (arg0.getBankAccount().getAccountBalance()-
+								(arg1.getBankAccount().getAccountBalance()));
+						if(count%2==0)
+							return 1;
+						return -1;
+					}
+				});
+				
+				request.setAttribute("accounts", accountSet);
+				dispatcher = request.getRequestDispatcher("AccountDetails.jsp");
+				dispatcher.forward(request, response);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			}
+			break;
+	
+		case "/sortByAccountNumber.mm":
+			count+=1;
+			try {
+				Collection<SavingsAccount> accounts = savingaccountservice.getAllSavingsAccount();
+				List<SavingsAccount> accountSet = new ArrayList<>(accounts);
+				Collections.sort(accountSet,new Comparator<SavingsAccount>(){
+					@Override
+					public int compare(SavingsAccount arg0, SavingsAccount arg1) {
+						int result= (int) (arg0.getBankAccount().getAccountNumber()-
+								(arg1.getBankAccount().getAccountNumber()));
+						if(count%2==0)
+							return 1;
+						return -1;
+					}
+				});
+				
+				request.setAttribute("accounts", accountSet);
+				dispatcher = request.getRequestDispatcher("AccountDetails.jsp");
+				dispatcher.forward(request, response);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			}
+			break;
+	
+
 	}	
 	}
-	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 	}
-
 }

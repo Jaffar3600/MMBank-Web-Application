@@ -5,10 +5,12 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<form action = "delete.mm">
+<form action = "getCurrentBal.mm">
 	<label>Enter Account Number:</label>
-	<input type = "number" name="closeAccount">
-	<input type ="submit" value = "submit">
+	<input type = "number" name="currentBalance">
+	<input type ="submit" value = "submit"><br>
+	
 	</form>
+	<a href = "index.jsp">HOME</a>
 </body>
 </html>

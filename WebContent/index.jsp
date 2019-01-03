@@ -12,7 +12,8 @@
 	<li><a href = "withdraw.mm">Withdraw</a></li>
 	<li><a href = "deposit.mm">Deposit</a></li>
 	<li><a href = "fundTransfer.mm">FundTransfer</a></li>
-	
+	<li><a href = "searchForm.mm">SearchAccount</a></li>
+	<li><a href="getAll.mm">Get All Account Details</a></li>
 	</ul>
 </body>
 </html>

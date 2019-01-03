@@ -16,6 +16,6 @@
 	 <input type ="submit" value = "submit">
 	 <input type ="reset" value = "reset">
 	</form>
-	
+	<a href = "index.jsp">HOME</a>
 </body>
 </html>
